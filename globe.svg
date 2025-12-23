@@ -1,0 +1,37 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Nền bo góc tròn cho icon app -->
+  <rect width="512" height="512" rx="120" fill="black"/>
+  
+  <!-- Quả cầu chính với gradient tỏa tròn -->
+  <circle cx="256" cy="256" r="140" fill="url(#paint0_radial_logo)" fill-opacity="0.3"/>
+  
+  <!-- Viền quả cầu đứt đoạn -->
+  <circle cx="256" cy="256" r="140" stroke="#00F2FF" stroke-width="4" stroke-dasharray="8 12"/>
+  
+  <!-- Lưới tọa độ nội bộ (Kinh/Vĩ tuyến) -->
+  <path d="M256 116V396" stroke="#00F2FF" stroke-width="2" stroke-opacity="0.5"/>
+  <path d="M116 256H396" stroke="#00F2FF" stroke-width="2" stroke-opacity="0.5"/>
+  <ellipse cx="256" cy="256" rx="140" ry="60" stroke="#00F2FF" stroke-width="2" stroke-opacity="0.5"/>
+  <ellipse cx="256" cy="256" rx="60" ry="140" stroke="#00F2FF" stroke-width="2" stroke-opacity="0.5"/>
+  
+  <!-- Vòng hào quang mờ bên ngoài -->
+  <circle cx="256" cy="256" r="180" stroke="#00F2FF" stroke-width="1" stroke-opacity="0.2"/>
+  
+  <!-- Các điểm hạt năng lượng có hiệu ứng nhấp nháy -->
+  <circle cx="350" cy="180" r="6" fill="#00F2FF">
+    <animate attributeName="opacity" values="1;0.2;1" dur="3s" repeatCount="indefinite" />
+  </circle>
+  <circle cx="180" cy="380" r="4" fill="#00F2FF">
+    <animate attributeName="opacity" values="0.2;1;0.2" dur="4s" repeatCount="indefinite" />
+  </circle>
+  <circle cx="380" cy="310" r="3" fill="#00F2FF">
+    <animate attributeName="opacity" values="0.5;1;0.5" dur="2.5s" repeatCount="indefinite" />
+  </circle>
+
+  <defs>
+    <radialGradient id="paint0_radial_logo" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(256 256) rotate(90) scale(140)">
+      <stop stop-color="#00F2FF"/>
+      <stop offset="1" stop-color="#00F2FF" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+</svg>
