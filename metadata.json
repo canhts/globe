@@ -1,5 +1,5 @@
 {
-  "name": "Globe",
+  "name": "globe",
   "description": "Một quả cầu 3D tương tác điều khiển bằng cử chỉ 5 ngón tay qua camera hoặc thao tác chạm.",
   "requestFramePermissions": [
     "camera"

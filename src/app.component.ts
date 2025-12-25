@@ -37,11 +37,11 @@ export class AppComponent implements AfterViewInit, OnDestroy {
   isShuttingDown = signal(false);
   activeFingers = signal(0);
   isLoadingCamera = signal(false);
-  appVersion = signal('v6.0.0 RESPONSIVE');
+  appVersion = signal('v6.1.0 STABLE');
 
   // UI status
   controlStatus = computed(() => {
-    if (this.isShuttingDown()) return 'Đang trả về trạng thái gốc...';
+    if (this.isShuttingDown()) return 'Đang ổn định hệ thống...';
     if (!this.isHandDetected()) return 'Đang quét không gian...';
     if (this.activeFingers() >= 4) return 'Kết nối: Ổn định';
     return 'Xòe bàn tay để kích hoạt';
@@ -65,12 +65,12 @@ export class AppComponent implements AfterViewInit, OnDestroy {
   
   // Physics Constants
   private rotationVelocity = new THREE.Quaternion(0, 0, 0, 1); 
-  private readonly rotationDrag = 0.18; 
+  private readonly rotationDrag = 0.15; // Giảm nhẹ lực cản xoay tự nhiên để mượt hơn
   private zoomVelocity = 0;
-  private readonly zoomDampingFactor = 0.8;
+  private readonly zoomDampingFactor = 0.82; // Tăng damping để zoom dừng dứt khoát hơn
   
   // Globe Scale Management
-  private baseGlobeScale = 1.0; // Sẽ được tính lại dựa trên màn hình
+  private baseGlobeScale = 1.0; 
   private currentGlobeScale = 1.0;
   private targetGlobeScale = 1.0;
   private readonly minScale = 0.3; 
@@ -81,8 +81,9 @@ export class AppComponent implements AfterViewInit, OnDestroy {
   private mediaPipeCamera: any;
   private smoothedHandPos = { x: 0.5, y: 0.5 };
   private smoothedSpread = 0;
-  private readonly smoothingAlpha = 0.05; 
-  private readonly rotationDeadZone = 0.0015; 
+  // Giảm alpha (0.05 -> 0.035) để tăng độ trễ, giảm rung lắc từ tay
+  private readonly smoothingAlpha = 0.035; 
+  private readonly rotationDeadZone = 0.002; 
 
   // Shader Uniforms
   private shaderUniforms = {
@@ -110,10 +111,8 @@ export class AppComponent implements AfterViewInit, OnDestroy {
   private updateBaseScale(): void {
     const width = window.innerWidth;
     const height = window.innerHeight;
-    // Nếu màn hình dọc (Portrait), giảm kích thước ban đầu xuống 0.85
     this.baseGlobeScale = height > width ? 0.82 : 1.0;
     
-    // Nếu là lần đầu chạy, set target bằng base
     if (this.currentGlobeScale === 1.0 && !this.isCameraActive()) {
       this.targetGlobeScale = this.baseGlobeScale;
       this.currentGlobeScale = this.baseGlobeScale;
@@ -255,10 +254,11 @@ export class AppComponent implements AfterViewInit, OnDestroy {
     const time = this.clock.getElapsedTime();
     this.shaderUniforms.uTime.value = time;
 
-    // Reset Scale mượt mà về kích thước BASE của thiết bị
+    // Reset Scale: Giảm tốc độ lerp xuống 0.05 để êm hơn
     if (this.isShuttingDown()) {
-      this.targetGlobeScale += (this.baseGlobeScale - this.targetGlobeScale) * 0.07;
-      this.zoomVelocity *= 0.4;
+      this.targetGlobeScale += (this.baseGlobeScale - this.targetGlobeScale) * 0.05;
+      // Triệt tiêu vận tốc zoom cực nhanh khi shutdown để không bị nảy
+      this.zoomVelocity *= 0.1;
     }
 
     if (Math.abs(this.zoomVelocity) > 0.0001) {
@@ -270,10 +270,10 @@ export class AppComponent implements AfterViewInit, OnDestroy {
     this.shaderUniforms.uScale.value = this.currentGlobeScale;
     this.worldMapMesh.scale.setScalar(this.currentGlobeScale);
 
-    // Reset Góc xoay mượt mà (Homing)
+    // Reset Góc xoay: Giảm tốc độ slerp để không bị giật cục
     if (this.isShuttingDown()) {
-      this.particleSphere.quaternion.slerp(new THREE.Quaternion(0, 0, 0, 1), 0.07);
-      this.rotationVelocity.slerp(new THREE.Quaternion(0, 0, 0, 1), 0.2);
+      this.particleSphere.quaternion.slerp(new THREE.Quaternion(0, 0, 0, 1), 0.05);
+      this.rotationVelocity.slerp(new THREE.Quaternion(0, 0, 0, 1), 0.1); // Triệt tiêu quán tính mạnh
     } else {
       const idleRot = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), 0.0003);
       this.particleSphere.quaternion.premultiply(idleRot);
@@ -407,7 +407,8 @@ export class AppComponent implements AfterViewInit, OnDestroy {
 
         if (dist > this.rotationDeadZone) {
           const axis = new THREE.Vector3(dy, -dx, 0).normalize();
-          const angle = Math.pow(dist, 1.25) * 25.0; 
+          // Giảm hệ số nhân từ 25.0 xuống 18.0 để xoay chậm và đầm hơn
+          const angle = Math.pow(dist, 1.25) * 18.0; 
           const dq = new THREE.Quaternion().setFromAxisAngle(axis, angle);
           this.particleSphere.quaternion.premultiply(dq);
           this.rotationVelocity.copy(dq);
@@ -425,7 +426,8 @@ export class AppComponent implements AfterViewInit, OnDestroy {
         if (this.smoothedSpread !== 0) {
           const deltaSpread = spread - this.smoothedSpread;
           if (Math.abs(deltaSpread) > 0.02) {
-            this.zoomVelocity += deltaSpread * 0.45;
+            // Giảm lực zoom từ 0.45 xuống 0.35
+            this.zoomVelocity += deltaSpread * 0.35;
           }
         }
         this.smoothedSpread = spread;
